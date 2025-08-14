@@ -8,7 +8,8 @@ from langchain.prompts import (
 from langchain.agents import OpenAIFunctionsAgent, AgentExecutor
 from dotenv import load_dotenv
 
-from tools.sql import run_query_tool, list_tables, describe_tables_tool
+
+from tools.sql import run_query_tool, list_tables, describe_tables, describe_tables_tool
 
 load_dotenv()
 
@@ -17,19 +18,30 @@ llm = ChatOpenAI()
 
 #prompt
 tables = list_tables()
-system_msg_1 = SystemMessage(content=f"you are an AI having access to SQLLite database \n {tables}")
-system_msg_2 = SystemMessage(content=(
-    "you are an AI having access to SQLLite database. \n"
-    f"The database has tables of: {tables} \n"
-    "Donot make any assumptions about what tables exist or what columns exist, "
-    "Instead use the 'describe_tables' function"                                
-))
+
+table_list = [t.strip() for t in tables.split(",")]
+print(describe_tables(table_list))
+
+system_msg = SystemMessage(content=f"""
+You are an AI assistant with access to an SQLite database via tools.
+Available Tables:
+{tables}
+
+Rules of Engagement:
+1. For searches involving a city, state, pincode, or any place name, never assume column names.
+   Always check the schema first by using: {describe_tables(['addresses'])} 
+   but do this **only once** per session and reuse the cached schema for subsequent queries.
+2. Read-only by default. Do not perform INSERT/UPDATE/DELETE/DDL unless user explicitly asks and confirms.
+""")
+
+
+print(system_msg.content)
 
 
 human_msg = HumanMessagePromptTemplate.from_template("{input}")
 prompt = ChatPromptTemplate(
     messages=[
-        system_msg_2,
+        system_msg,
         human_msg,
         MessagesPlaceholder(variable_name="agent_scratchpad"),  
     ]
@@ -54,3 +66,10 @@ agent_executor = AgentExecutor(
 
 agent_executor("How many users are in the database?")
 agent_executor("How many users have provided shipping address?")
+agent_executor("Total number of products")
+
+agent_executor("name of the user whose address contains Matthewport")
+agent_executor("name of the user whose zipcode is 82596")
+agent_executor("name of the user whose city contains East Jamesstad")
+agent_executor("name of the user whose address contains Harrison Gardens")
+agent_executor("name of the user whose state is FL")
