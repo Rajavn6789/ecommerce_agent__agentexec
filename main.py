@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 
 
 from tools.sql import run_query_tool, list_tables, describe_tables, describe_tables_tool
+from tools.report import write_report_tool
 
 load_dotenv()
 
@@ -48,7 +49,7 @@ prompt = ChatPromptTemplate(
 )
 
 # Agent - chain that knows how to use tools
-tools = [run_query_tool, describe_tables_tool]
+tools = [run_query_tool, describe_tables_tool, write_report_tool]
 agent = OpenAIFunctionsAgent(
     llm=llm,
     prompt=prompt,
@@ -64,12 +65,13 @@ agent_executor = AgentExecutor(
 )
 
 
-agent_executor("How many users are in the database?")
-agent_executor("How many users have provided shipping address?")
-agent_executor("Total number of products")
+# agent_executor("How many users are in the database?")
+# agent_executor("How many users have provided shipping address?")
+# agent_executor("Total number of products")
+# agent_executor("name of the user whose address contains Matthewport")
+# agent_executor("name of the user whose zipcode is 82596")
+# agent_executor("name of the user whose city contains East Jamesstad")
+# agent_executor("name of the user whose address contains Harrison Gardens")
+# agent_executor("name of the user whose state is FL")
 
-agent_executor("name of the user whose address contains Matthewport")
-agent_executor("name of the user whose zipcode is 82596")
-agent_executor("name of the user whose city contains East Jamesstad")
-agent_executor("name of the user whose address contains Harrison Gardens")
-agent_executor("name of the user whose state is FL")
+agent_executor("Summarise the top 5 most popular products. Write the results to a report file in a table with product name, price and order count.")
