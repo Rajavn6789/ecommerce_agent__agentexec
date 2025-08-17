@@ -13,10 +13,15 @@ from dotenv import load_dotenv
 from tools.sql import run_query_tool, list_tables, describe_tables, describe_tables_tool
 from tools.report import write_report_tool
 
+from handlers.chat_model_start_handler import ChatModelStartHandlerMin
+
 load_dotenv()
 
 #llm
-llm = ChatOpenAI()
+handler = ChatModelStartHandlerMin()
+llm = ChatOpenAI(
+    callbacks=[handler]
+)
 
 #prompt
 tables = list_tables()
@@ -61,22 +66,22 @@ memory = ConversationBufferMemory(memory_key="chat_history", return_messages=Tru
 agent_executor = AgentExecutor(
     agent=agent,
     tools=tools,
-    verbose=True,
+    #verbose=True,
     memory=memory,
     handle_parsing_errors=True,
 )
 
 
-# agent_executor("How many users are in the database?")
-# agent_executor("How many users have provided shipping address?")
-# agent_executor("Total number of products")
-# agent_executor("name of the user whose address contains Matthewport")
-# agent_executor("name of the user whose zipcode is 82596")
-# agent_executor("name of the user whose city contains East Jamesstad")
-# agent_executor("name of the user whose address contains Harrison Gardens")
+agent_executor("How many users are in the database?")
+agent_executor("How many users have provided shipping address?")
+agent_executor("Total number of products")
+agent_executor("name of the user whose address contains Matthewport")
+agent_executor("name of the user whose zipcode is 82596")
+agent_executor("name of the user whose city contains East Jamesstad")
+agent_executor("name of the user whose address contains Harrison Gardens")
 # agent_executor("name of the user whose state is FL")
 #agent_executor("Summarise the top 5 most popular products. Write the results to a report file in a table with product name, price and order count.")
+#agent_executor("delete users table.")
 
-agent_executor("How many orders are there? write the result to an html report")
-agent_executor("repeat the exact same process for users.")
-agent_executor("delete users table.")
+#agent_executor("How many orders are there? write the result to an html report")
+#agent_executor("repeat the exact same process for users.")
