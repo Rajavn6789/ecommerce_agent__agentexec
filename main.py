@@ -6,6 +6,7 @@ from langchain.prompts import (
     MessagesPlaceholder,
 )
 from langchain.agents import OpenAIFunctionsAgent, AgentExecutor
+from langchain.memory import ConversationBufferMemory
 from dotenv import load_dotenv
 
 
@@ -34,17 +35,15 @@ Rules of Engagement:
    but do this **only once** per session and reuse the cached schema for subsequent queries.
 2. Read-only by default. Do not perform INSERT/UPDATE/DELETE/DDL unless user explicitly asks and confirms.
 """)
-
-
-print(system_msg.content)
-
-
 human_msg = HumanMessagePromptTemplate.from_template("{input}")
+chat_history_placeholder =  MessagesPlaceholder(variable_name="chat_history")
+agent_scratchpad_placeholder = MessagesPlaceholder(variable_name="agent_scratchpad")
 prompt = ChatPromptTemplate(
     messages=[
         system_msg,
+        chat_history_placeholder, 
         human_msg,
-        MessagesPlaceholder(variable_name="agent_scratchpad"),  
+        agent_scratchpad_placeholder,  
     ]
 )
 
@@ -56,11 +55,14 @@ agent = OpenAIFunctionsAgent(
     tools=tools,
 )
 
+
 # AgentExecutor - takes an agent and runs until the response is not functon call
+memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 agent_executor = AgentExecutor(
     agent=agent,
     tools=tools,
     verbose=True,
+    memory=memory,
     handle_parsing_errors=True,
 )
 
@@ -73,5 +75,7 @@ agent_executor = AgentExecutor(
 # agent_executor("name of the user whose city contains East Jamesstad")
 # agent_executor("name of the user whose address contains Harrison Gardens")
 # agent_executor("name of the user whose state is FL")
+#agent_executor("Summarise the top 5 most popular products. Write the results to a report file in a table with product name, price and order count.")
 
-agent_executor("Summarise the top 5 most popular products. Write the results to a report file in a table with product name, price and order count.")
+agent_executor("How many orders are there? write the result to an html report")
+agent_executor("repeat the exact same process for users.")
