@@ -33,7 +33,7 @@ Rules of Engagement:
 1. For searches involving a city, state, pincode, or any place name, never assume column names.
    Always check the schema first by using: {describe_tables(['addresses'])} 
    but do this **only once** per session and reuse the cached schema for subsequent queries.
-2. Read-only by default. Do not perform INSERT/UPDATE/DELETE/DDL unless user explicitly asks and confirms.
+2. Read-only by default. Do not perform INSERT/UPDATE/DELETE/DDL.
 """)
 human_msg = HumanMessagePromptTemplate.from_template("{input}")
 chat_history_placeholder =  MessagesPlaceholder(variable_name="chat_history")
@@ -79,3 +79,4 @@ agent_executor = AgentExecutor(
 
 agent_executor("How many orders are there? write the result to an html report")
 agent_executor("repeat the exact same process for users.")
+agent_executor("delete users table.")
